@@ -1,0 +1,14 @@
+appdirs
+asgiref
+black
+click
+django-debug-toolbar
+django-ninja
+djangorestframework
+mypy-extensions
+pathspec
+pytz
+regex
+sqlparse
+toml
+typing-extensions
