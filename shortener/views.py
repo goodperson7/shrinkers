@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from django.views.decorators.csrf import csrf_exempt
 from .forms import RegisterFrom 
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from .models import PayPlan, UserDetail
 
 # Create your views here. 
 
@@ -67,6 +70,23 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("index")
+
+# @login_required
+def list_view(request):
+    page = int(request.GET.get("p", 1))
+    users = User.objects.all().order_by("-id")
+    user_details = UserDetail.objects.filter(user_id__in=[user.id for user in users])
+    user_details_dict = {ud.user_id: ud.pay_plan for ud in user_details}
+    
+    for user in users:
+        user.pay_plan = user_details_dict.get(user.id, None)
+        if user.pay_plan:
+            print(f"메뉴 : {user.pay_plan.name} // 금액 : {user.pay_plan.price}")
+    
+    paginator = Paginator(users, 10)
+    users = paginator.get_page(page)
+
+    return render(request, "boards.html", {"users": users})
                 
 
 

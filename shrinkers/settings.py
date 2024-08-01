@@ -39,10 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'shortener.apps.ShortenerConfig',
     'debug_toolbar',
+    'django_seed',
 ]
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+LOGIN_URL = "/login"
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
