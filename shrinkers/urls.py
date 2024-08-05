@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from shortener.views import index, get_user, register,login_view, logout_view,list_view, url_list
+from shortener.views import index, get_user, register,login_view, logout_view,list_view, url_list,url_create,url_change
 import debug_toolbar
 import mimetypes
 mimetypes.add_type("application/javascript", ".js", True)
@@ -15,6 +15,8 @@ urlpatterns = [
     path("login", login_view, name="login"),
     path("logout", logout_view, name="logout"),
     path('url_list', url_list, name="url_list"),
+    path('urls/create',url_create, name="url_create"),
+    path('urls/<str:action>/<int:url_id>/', url_change, name="url_change"),
 ]
 
 
