@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from django.views.decorators.csrf import csrf_exempt
-from .forms import RegisterFrom 
+from .forms import RegisterFrom, LoginForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from .models import PayPlan, UserDetail
@@ -17,6 +17,9 @@ def index(request):
     if request.user.is_authenticated:
         email = "Anonymous User!"
     return render(request, "base.html",{"welcom_msg":f"Hello {email}"})
+
+def url_list(request):
+    return render(request, "url_list.html")
  
 
 @csrf_exempt
@@ -51,21 +54,32 @@ def register(request):
         return render(request, "register.html", {"form": form})
     
 def login_view(request):
+    msg = None
+    is_ok = False
     if request.method == "POST":
-        form = AuthenticationForm(request, request.POST)
-        msg = "가입되어 있지 않거나 로그인 정보가 잘못 되었습니다."
-        print(form.is_valid)
+        form = LoginForm(request.POST)
+
         if form.is_valid():
-            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             raw_password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=raw_password)
-            if user is not None:
-                msg = "로그인 성공"
-                login(request, user)
-        return render(request, "login.html", {"form": form, "msg": msg})
+            remember_me = form.cleaned_data.get('remember_me')
+            msg = "올바른 유저ID와 패스워드를 입력해주세요."
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                msg = "존재하지 않는 이메일 입니다."
+            else:
+                if user.check_password(raw_password):
+                    msg = None
+                    login(request, user)
+                    is_ok = True
+                    request.session["remember_me"] = remember_me
+
     else:
-        form = AuthenticationForm()
-        return render(request, "login.html", {"form": form})
+        msg = None
+        form = LoginForm()
+    print("REMEMBER ME : ", request.session.get("remember_me"))
+    return render(request, "login.html", {"form": form,"msg": msg, "is_ok": is_ok})
     
 def logout_view(request):
     logout(request)

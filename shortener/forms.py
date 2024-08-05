@@ -11,3 +11,20 @@ class RegisterFrom(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'last_name', 'email', 'password1', 'password2')
+
+class LoginForm(forms.Form):
+    email = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "이메일"}) 
+    )
+    password = forms.CharField(
+        max_length=30,
+        required=True,
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "비밀번호"})
+    )
+    remember_me = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "custom-control-input","id":"_loginRememberMe"}),
+        disabled=False
+    )
