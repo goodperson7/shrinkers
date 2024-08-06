@@ -1,9 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
 from shortener.views import index, get_user, register,login_view, logout_view,list_view, url_list,url_create,url_change
-import debug_toolbar
 import mimetypes
-mimetypes.add_type("application/javascript", ".js", True)
+from shrinkers.settings import DEBUG
+if DEBUG:
+    import debug_toolbar
+
+    mimetypes.add_type("application/javascript", ".js", True)
 
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
@@ -20,3 +23,7 @@ urlpatterns = [
 ]
 
 
+# if DEBUG:
+#     urlpatterns += [
+#         path("__debug__/", include(debug_toolbar.urls)),  # Django Debug Tool
+#     ]
