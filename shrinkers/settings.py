@@ -98,8 +98,17 @@ WSGI_APPLICATION = 'shrinkers.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "mydatabase",
+        "USER": "root",
+        "PASSWORD": "kim??9522",
+        "HOST": "localhost",
+        "PORT": 3306,
+        "OPTIONS": {
+            "charset": "utf8mb4",
+        }
     }
 }
 
