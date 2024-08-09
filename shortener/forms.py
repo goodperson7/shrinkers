@@ -1,11 +1,12 @@
 from django import forms
+from shortener.utils import url_count_changer
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import ShorteneUrls
+from .models import ShorteneUrls 
 from django.utils.translation import gettext_lazy as _
 
 
-class RegisterFrom(UserCreationForm):
+class RegisterForm(UserCreationForm):
     last_name = forms.CharField(max_length=50, required=False, help_text="Optional", label="이름")
     username = forms.CharField(max_length=50, required=True, help_text="Optional", label="아이디")
     email = forms.EmailField(max_length=254, required=True, help_text="Required. Inform a valid email address.")
@@ -46,10 +47,15 @@ class UrlCreateForm(forms.ModelForm):
 
     def save(self, request, commit=True):
         instance = super(UrlCreateForm, self).save(commit=False)
-        instance.created_by_id = request.user.id
+        instance.creator_id = request.user.id
         instance.target_url = instance.target_url.strip()
         if commit:
-            instance.save()
+            try:
+                instance.save()
+            except Exception as e:
+                print(e)
+            else:
+                url_count_changer(request, True) 
         return instance
     
     def update_form(self, request, url_id):

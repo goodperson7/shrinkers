@@ -91,7 +91,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'shrinkers.wsgi.application'
-
+CSRF_COOKIE_SECURE = False,  # 개발 환경에서는 False로 설정
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -106,7 +106,8 @@ DATABASES = {
         "PASSWORD": "kim??9522",
         "HOST": "localhost",
         "PORT": 3306,
-        "OPTIONS": {
+        "OPTIONS": {        
+            
             "charset": "utf8mb4",
         }
     }
