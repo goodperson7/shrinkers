@@ -2,12 +2,18 @@ from shortener.utils import url_count_changer
 from django.contrib import messages
 from shortener.forms import UrlCreateForm
 from django.shortcuts import render, redirect, get_object_or_404
-from shortener.models import ShorteneUrls
+from shortener.models import ShorteneUrls, Statistic
 from django.contrib.auth.decorators import login_required
+from django.contrib.gis.geoip2 import GeoIP2
+from ratelimit.decorators import ratelimit
 
 
+@ratelimit(key="ip", rate="3/m")
 
 def url_redirect(request, prefix, url):
+    was_limited = getattr(request, "limited", False)
+    if was_limited:
+        return redirect("index")
     print(prefix, url)
     get_url = get_object_or_404(ShorteneUrls, prefix=prefix, shortened_url=url)
     is_permanent = False
@@ -18,10 +24,15 @@ def url_redirect(request, prefix, url):
     if not target.startswith("https://") and not target.startswith("http://"):
         target = f"https://{get_url.target_url}"
 
+    history = Statistic()
+    history.record(request, get_url)
+
     return redirect(target, permanent=is_permanent)
 
 @login_required
 def url_list(request):
+    country = GeoIP2().country("auction.co.kr")
+    print(f"country  : {country}")
     get_list = ShorteneUrls.objects.order_by("-created_at").all()
     return render(request, "url_list.html", {"list": get_list})
 

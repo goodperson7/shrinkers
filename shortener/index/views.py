@@ -58,7 +58,7 @@ def login_view(request):
             except Users.DoesNotExist:
                 pass
             else:
-                if user.check_password(raw_password):
+                if user.user.check_password(raw_password):
                     msg = None
                     login(request, user.user)
                     is_ok = True
