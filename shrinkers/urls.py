@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from shortener.urls.views import url_redirect
+from shortener.urls.urls import router as url_router
 import mimetypes
 from shrinkers.settings import DEBUG
 if DEBUG:
@@ -13,6 +14,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("shortener.index.urls")),
     path("urls/", include("shortener.urls.urls")),
+    path("api/", include(url_router.urls)),
     path("<str:prefix>/<str:url>",url_redirect),
     # path('urls/create',url_create, name="url_create"),
     # path('urls/<str:action>/<int:url_id>/', url_change, name="url_change"),

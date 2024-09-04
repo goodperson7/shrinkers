@@ -1,8 +1,12 @@
 from django.db import models
 import string
 import random
+import itertools
+from typing import Dict
 from django.contrib.auth.models import User
 from django.contrib.gis.geoip2 import GeoIP2
+from django.db.models.base import Model
+from shortener.model_utils import dict_filter, dict_slice, location_finder
 
 # Create your models here.
 
@@ -35,6 +39,7 @@ class Users(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)
     Organization = models.ForeignKey(Organization, on_delete=models.DO_NOTHING, null=True)
+    
     url_count = models.IntegerField(default=0)
 
 class EmailVerification(TimeStampedModel):
@@ -101,16 +106,20 @@ class Statistic(TimeStampedModel):
     device_os = models.CharField(max_length=30)
     country_code = models.CharField(max_length=2, default="XX")
     country_name = models.CharField(max_length=50, default="Unknown")
+    custom_params = models.JSONField(null=True)
 
-    def record(self, request, url: ShorteneUrls):
+    def record(self, request, url: ShorteneUrls, params: Dict):
         self.shortened_url = url
         print(f"url : {url.target_url}")
         self.ip = request.META["REMOTE_ADDR"]
         self.web_browser = request.user_agent.browser.family
         self.device = self.ApproachDevice.MOBILE if request.user_agent.is_mobile else self.ApproachDevice.TABLET if request.user_agent.is_tablet else self.ApproachDevice.PC
         self.device_os = request.user_agent.os.family
+        t = TrackingParams.get_tracking_params(url.id)
+        self.custom_params = dict_slice(dict_filter(params, t), 5)
         try:
-            country = GeoIP2().country(self.ip)
+            # country = GeoIP2().country(self.ip)
+            country = location_finder(request)
             self.country_code = country.get("country_code", "XX")
             self.country_name = country.get("country_name", "Unknown")
         except:
@@ -118,6 +127,13 @@ class Statistic(TimeStampedModel):
         url.clicked()
         self.save()
 
+class TrackingParams(TimeStampedModel):
 
+    shortened_url = models.ForeignKey(ShorteneUrls, on_delete=models.CASCADE)
+    params = models.CharField(max_length=20)
+
+    @classmethod
+    def get_tracking_params(cls, shortened_url_id):
+        return cls.objects.filter(shortened_url_id=shortened_url_id).values_list("params", flat=True)
 
     
